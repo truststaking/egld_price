@@ -43,7 +43,7 @@ def update_db(table, timestamp=binance_listing):
             for data in tmp_data:
                 timestamp = data[6] // 1000
                 price = (float(data[1]) + float(data[2]) + float(data[3]) + float(data[4])) / 4
-                item = {'id': getEpoch(timestamp), 'timestamp': timestamp, 'price': '{:.2f}'.format(price)}
+                item = {'epoch': getEpoch(timestamp), 'timestamp': timestamp, 'price': '{:.2f}'.format(price)}
                 table.put_item(Item=item)
                 last_timestamp = timestamp
                 print(getEpoch(timestamp), timestamp, '{:.2f}'.format(price))
@@ -76,7 +76,7 @@ def add_erd(table, timestamp=genesis['timestamp']):
                     break
                 price = (float(data[1]) + float(data[2]) + float(data[3]) + float(data[4])) / 4
                 price *= 1000
-                item = {'id': getEpoch(timestamp), 'timestamp': timestamp, 'price': '{:.2f}'.format(price)}
+                item = {'epoch': getEpoch(timestamp), 'timestamp': timestamp, 'price': '{:.2f}'.format(price)}
                 table.put_item(Item=item)
                 last_timestamp = timestamp
                 print(getEpoch(timestamp), timestamp, '{:.2f}'.format(price))
@@ -93,23 +93,7 @@ def main():
     global last_timestamp
 
     # if db is empty load all the data from genesis
-    if EGLDUSD.item_count == 0:
-        add_erd(EGLDUSD)
-        update_db(EGLDUSD)
-
-    while True:
-        try:
-            with open('last_timestamp', 'r') as f:
-                last_timestamp = int(f.readline())
-        except:
-            print("Could not read file.")
-        update_db(EGLDUSD, last_timestamp + 1)
-        try:
-            with open('last_timestamp', 'w') as f:
-                f.write(str(last_timestamp))
-        except:
-            print("Could not read file.")
-        time.sleep(60)
+    update_db(EGLDUSD)
 
 
 def example():
